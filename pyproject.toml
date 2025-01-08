@@ -1,10 +1,8 @@
 [project]
-name = "llama"
+name = "freeze-attn"
 version = "0.1.0"
-description = "Add your description here"
-authors = [
-    { name = "Donald Thompson", email = "witt3rd@witt3rd.com" }
-]
+description = "Freeze attention in Llama models"
+authors = [{ name = "Donald Thompson", email = "witt3rd@witt3rd.com" }]
 dependencies = [
     "tiktoken>=0.8.0",
     "blobfile>=3.0.0",
@@ -15,18 +13,63 @@ dependencies = [
     "protobuf>=5.29.2",
 ]
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = ">= 3.12"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+
+[tool.ruff]
+# Enable Ruff's formatter
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+# Enable Flake8 rules by default
+select = ["E", "F"]
+# Also add other useful rule sets
+extend-select = [
+    "B",  # flake8-bugbear
+    "I",  # isort
+    "N",  # naming
+    "UP", # pyupgrade
+    "D",  # pydocstyle
+]
+fixable = ["ALL"]
+ignore = [
+    #
+    # This configuration chooses D211 (no blank line) and D212 (summary on first line) as the preferred styles.
+    # These choices align with common Python conventions and are compatible with popular style guides.
+    #
+    "D203", # Prefer no blank line before class (D211)
+    "D213", # Prefer summary on first line (D212)
+    #
+    "D100", # Missing docstring in public module
+    "D104", # Missing docstring in public package
+    "D103", # Missing docstring in public function
+    #
+    "E501", # Line too long
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
 [tool.rye]
 managed = true
-dev-dependencies = []
+dev-dependencies = ["ruff>=0.8.6", "basedpyright>=1.23.2", "pre-commit>=4.0.1"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/llama"]
+
+[tool.rye.scripts]
+format = "ruff format src/"
+lint = "ruff check src/"
+typecheck = "basedpyright src/"
+validate = { chain = ["format", "lint", "typecheck"] }
+pc = { cmd = "pre-commit run --all-files", cwd = "src/" }

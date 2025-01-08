@@ -11,9 +11,9 @@
 
 -e file:.
 accelerate==1.2.1
-    # via llama
+    # via freeze-attn
 blobfile==3.0.0
-    # via llama
+    # via freeze-attn
 certifi==2024.12.14
     # via requests
 charset-normalizer==3.4.1
@@ -80,7 +80,7 @@ packaging==24.2
     # via huggingface-hub
     # via transformers
 protobuf==5.29.2
-    # via llama
+    # via freeze-attn
 psutil==6.1.1
     # via accelerate
 pycryptodomex==3.21.0
@@ -100,23 +100,23 @@ safetensors==0.5.1
     # via accelerate
     # via transformers
 sentencepiece==0.2.0
-    # via llama
+    # via freeze-attn
 setuptools==75.7.0
     # via torch
 sympy==1.13.1
     # via torch
 tiktoken==0.8.0
-    # via llama
+    # via freeze-attn
 tokenizers==0.21.0
     # via transformers
 torch==2.5.1
     # via accelerate
-    # via llama
+    # via freeze-attn
 tqdm==4.67.1
     # via huggingface-hub
     # via transformers
 transformers==4.47.1
-    # via llama
+    # via freeze-attn
 triton==3.1.0
     # via torch
 typing-extensions==4.12.2
