@@ -67,4 +67,4 @@ The library uses the Hugging Face Transformers library and specifically works wi
 
 ## License
 
-[Add your license information here]
+MIT License. See [LICENSE](LICENSE) for details.
