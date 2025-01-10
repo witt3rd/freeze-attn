@@ -21,6 +21,10 @@ This approach provides several unique capabilities:
 ## Example Usage
 
 ```python
+from transformers import AutoTokenizer, LlamaForCausalLM
+import torch
+from freeze_attn import save_cache_to_disk, load_cache_from_disk, process_prefix, generate_with_prefix
+
 # Initialize model and tokenizer
 tokenizer = AutoTokenizer.from_pretrained("cognitivecomputations/Dolphin3.0-Llama3.1-8B")
 model = LlamaForCausalLM.from_pretrained(
@@ -29,23 +33,38 @@ model = LlamaForCausalLM.from_pretrained(
     device_map="auto"
 )
 
-# Simple story generation test
-prefix = "Here's a story about a brave knight named Sir Roland. He lived in a castle high up in the mountains."
-continuations = [
-    "The knight was known for",
-    "One day, while riding his horse",
-    "In the castle, there was"
-]
-test_simple_story(model, tokenizer, "prefix_cache.pt")
+# Process and cache a document or context that you want to reuse
+document = """This is a technical document about quantum computing.
+It contains detailed information about qubits, quantum gates, and error correction.
+This document will be processed once and its attention state cached for repeated use."""
 
-# Book Q&A test with token limit
-test_book_qa(
-    model,
-    tokenizer,
-    "book.txt",
-    "book_cache.pt",
-    max_prefix_tokens=2000
-)
+# Process the document once and save its attention state
+process_prefix(model, tokenizer, document, "quantum_doc_cache.pt")
+
+# Later, or in a different session, generate multiple continuations using the cached state
+questions = [
+    "What are the key concepts discussed in this document?",
+    "Explain how quantum gates work based on the information provided.",
+    "Summarize the main points about error correction."
+]
+
+# Load the cached state once
+for question in questions:
+    response = generate_with_prefix(
+        model,
+        tokenizer,
+        question,
+        "quantum_doc_cache.pt",
+        max_new_tokens=100
+    )
+    print(f"Q: {question}\nA: {response}\n")
+
+# You can also manually manage the cache state
+document_cache, state_info = load_cache_from_disk("quantum_doc_cache.pt")
+
+# Create a new cache with modified state
+modified_cache = document_cache  # Modify as needed
+save_cache_to_disk(modified_cache, "modified_cache.pt", input_ids=state_info["input_ids"])
 ```
 
 ## Use Cases
