@@ -18,17 +18,22 @@ certifi==2024.12.14
     # via requests
 charset-normalizer==3.4.1
     # via requests
+einops==0.8.0
+    # via flash-attn
 filelock==3.16.1
     # via blobfile
     # via huggingface-hub
     # via torch
     # via transformers
     # via triton
+flash-attn==2.7.2.post1
+    # via freeze-attn
 fsspec==2024.12.0
     # via huggingface-hub
     # via torch
 huggingface-hub==0.27.1
     # via accelerate
+    # via freeze-attn
     # via tokenizers
     # via transformers
 idna==3.10
@@ -79,7 +84,7 @@ packaging==24.2
     # via accelerate
     # via huggingface-hub
     # via transformers
-protobuf==5.29.2
+protobuf==5.29.3
     # via freeze-attn
 psutil==6.1.1
     # via accelerate
@@ -96,12 +101,12 @@ requests==2.32.3
     # via huggingface-hub
     # via tiktoken
     # via transformers
-safetensors==0.5.1
+safetensors==0.5.2
     # via accelerate
     # via transformers
 sentencepiece==0.2.0
     # via freeze-attn
-setuptools==75.7.0
+setuptools==75.8.0
     # via torch
 sympy==1.13.1
     # via torch
@@ -111,6 +116,7 @@ tokenizers==0.21.0
     # via transformers
 torch==2.5.1
     # via accelerate
+    # via flash-attn
     # via freeze-attn
 tqdm==4.67.1
     # via huggingface-hub

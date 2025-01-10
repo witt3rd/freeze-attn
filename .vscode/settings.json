@@ -1,12 +1,17 @@
 {
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll": true,
-    "source.organizeImports": true
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
   },
-  "python.analysis.typeCheckingMode": "basic",
   "python.linting.enabled": true,
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.stubPath": "./typings",
+  "python.analysis.diagnosticMode": "workspace",
   "[python]": {
-    "editor.defaultFormatter": "charliermarsh.ruff"
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
   }
 }

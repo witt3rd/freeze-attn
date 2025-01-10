@@ -1,0 +1,9 @@
+{
+    "include": [
+        "src"
+    ],
+    "typeCheckingMode": "basic",
+    "reportMissingImports": true,
+    "reportMissingTypeStubs": true,
+    "stubPath": "typings"
+}
