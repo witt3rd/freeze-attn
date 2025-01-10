@@ -1,62 +1,115 @@
-# Freeze-Attn: LLaMA Attention State Caching
+# Freeze-Attn: LLaMA 3.x Attention State Caching
 
-A Python library that implements an efficient caching mechanism for LLaMA model attention states, optimizing the processing of long prefixes like book text or documents.
+A Python library that enables explicit client-side control over LLaMA 3.x model attention states. Unlike internal prefix caching optimizations found in systems like vLLM, sglang, or commercial APIs, Freeze-Attn allows clients to explicitly identify, save, and reuse attention states from specific prefixes.
 
-## Purpose
+This approach provides several unique capabilities:
 
-This library optimizes the processing of long text sequences by:
+- Save attention states to persistent storage for later reuse across sessions
+- Share cached states between different clients or applications
+- Explicitly version and manage different prefix states
+- Control exactly when and how prefix states are reused
+- Avoid transmitting large prefix texts repeatedly in distributed systems
 
-- Running prefix text through the model once to build attention state
-- Capturing and saving that state to disk
-- Loading the saved state later to continue processing from that point
-- Supporting multiple loads of the same state for different continuations
+## Core Functions
 
-## Key Components
-
-- `save_cache_to_disk`: Saves a DynamicCache instance (containing key/value attention states) to disk
-- `load_cache_from_disk`: Loads a saved DynamicCache from disk
-- `process_prefix`: Takes a prefix text, processes it through the model, and saves its attention state
-- `generate_with_prefix`: Loads a saved prefix state and generates continuations from it
-
-## Benefits
-
-- Avoids reprocessing the same prefix text repeatedly
-- Improves performance for applications like question-answering over long documents
-- Allows multiple different continuations from the same prefix point
-- Reduces computational overhead for repetitive tasks
+- `save_cache_to_disk`: Saves attention state (DynamicCache) with additional context like input IDs and position information
+- `load_cache_from_disk`: Loads saved attention state and context for reuse
+- `process_prefix`: Processes initial text through the model and saves its attention state
+- `generate_with_prefix`: Generates continuations using a loaded attention state
+- `run_generation_test`: Compares performance between cached and uncached text generation
 
 ## Example Usage
 
 ```python
-# Process and cache a story prefix
-prefix = "Here's a story about a brave knight named Sir Roland..."
-process_prefix(model, tokenizer, prefix, "prefix_cache.pt")
+# Initialize model and tokenizer
+tokenizer = AutoTokenizer.from_pretrained("cognitivecomputations/Dolphin3.0-Llama3.1-8B")
+model = LlamaForCausalLM.from_pretrained(
+    "cognitivecomputations/Dolphin3.0-Llama3.1-8B",
+    torch_dtype=torch.bfloat16,
+    device_map="auto"
+)
 
-# Generate multiple different continuations from the same prefix
+# Simple story generation test
+prefix = "Here's a story about a brave knight named Sir Roland. He lived in a castle high up in the mountains."
 continuations = [
     "The knight was known for",
     "One day, while riding his horse",
     "In the castle, there was"
 ]
+test_simple_story(model, tokenizer, "prefix_cache.pt")
+
+# Book Q&A test with token limit
+test_book_qa(
+    model,
+    tokenizer,
+    "book.txt",
+    "book_cache.pt",
+    max_prefix_tokens=2000
+)
 ```
 
 ## Use Cases
 
-This library is particularly useful for applications where you need to:
+### Distributed Systems
 
-- Process long documents efficiently
-- Generate multiple different continuations from the same starting point
-- Avoid redundant computation of the same prefix text
-- Implement efficient question-answering systems over long documents
+- Save prefix states on a central server, allowing thin clients to generate completions without transmitting or processing the full prefix
+- Share common prefix states (e.g., system prompts, context) across multiple services
+- Version control different prefix states for A/B testing or gradual rollout
+
+### Content Generation
+
+- Cache the attention state for a story's beginning or character description, then generate multiple alternative continuations
+- Save states at key plot points to explore different narrative branches
+- Maintain consistent context across multiple generation sessions
+
+### Document Analysis
+
+- Process and cache a large document's attention state once, then run multiple queries against it
+- Save states for different sections of a document to enable focused analysis
+- Maintain separate cached states for different documents in a corpus
+
+### Interactive Applications
+
+- Cache the conversation history state in chat applications
+- Save game world descriptions in text-based games
+- Maintain persistent context in long-running interactive sessions
+
+### Mental Frame Priming
+
+- Cache attention states that represent specific "mental dispositions" of the model after careful dialog-based priming
+- Create a library of different "personalities" or "expert modes" through saved attention states
+- Achieve a form of lightweight, reversible "fine-tuning" without modifying model weights
+- Experiment with different prompting strategies and save the most effective ones as reusable states
+- Switch between different cognitive frames instantly by loading different cached states
+
+This approach offers an alternative to traditional fine-tuning:
+
+- No modification of model weights required
+- Instantly reversible - just load a different state
+- Can maintain multiple different "tunings" simultaneously
+- Experimental and iterative - easily try different priming approaches
+- More transparent - the priming dialog is explicit and reviewable
+
+### Summary
+
+These use cases particularly shine in scenarios where:
+
+- The same prefix needs to be reused across different sessions or clients
+- Prefix processing is computationally expensive or time-consuming
+- Network bandwidth for transmitting large prefixes is constrained
+- Fine-grained control over state management is required
+
+## Performance
+
+The library includes built-in performance comparison, showing speed improvements when using cached attention states versus processing the full prefix each time.
 
 ## Technical Details
 
-The library uses the Hugging Face Transformers library and specifically works with LLaMA models, leveraging their attention caching mechanisms. It ensures complete state storage by capturing:
-
-- `key_cache` and `value_cache`: The attention KV states for each layer
-- `_seen_tokens`: Number of tokens processed
-- Position information
-- Attention mask state
+- Uses PyTorch for tensor operations
+- Integrates with Hugging Face's DynamicCache for attention state management
+- Handles position IDs and attention masks for proper continuation
+- Supports truncation for long texts via `max_prefix_tokens`
+- Includes detailed debug logging for cache statistics and generation process
 
 ## Requirements
 
